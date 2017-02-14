@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySocket", "MySocket\MySocket.csproj", "{98180ECA-F06E-4353-B8DE-AF27D401FAED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{E6A53D6C-9939-4DD9-AC03-1952C8327A71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest.SocketServer", "ConsoleTest.SocketServer\ConsoleTest.SocketServer.csproj", "{61C14D4F-0827-42E2-B81B-B395D3197398}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest.SocketClient", "ConsoleTest.SocketClient\ConsoleTest.SocketClient.csproj", "{E1EDC921-ED4C-4F08-A9A9-DD28909D7859}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98180ECA-F06E-4353-B8DE-AF27D401FAED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98180ECA-F06E-4353-B8DE-AF27D401FAED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98180ECA-F06E-4353-B8DE-AF27D401FAED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98180ECA-F06E-4353-B8DE-AF27D401FAED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61C14D4F-0827-42E2-B81B-B395D3197398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61C14D4F-0827-42E2-B81B-B395D3197398}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61C14D4F-0827-42E2-B81B-B395D3197398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61C14D4F-0827-42E2-B81B-B395D3197398}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1EDC921-ED4C-4F08-A9A9-DD28909D7859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1EDC921-ED4C-4F08-A9A9-DD28909D7859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1EDC921-ED4C-4F08-A9A9-DD28909D7859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1EDC921-ED4C-4F08-A9A9-DD28909D7859}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{61C14D4F-0827-42E2-B81B-B395D3197398} = {E6A53D6C-9939-4DD9-AC03-1952C8327A71}
+		{E1EDC921-ED4C-4F08-A9A9-DD28909D7859} = {E6A53D6C-9939-4DD9-AC03-1952C8327A71}
+	EndGlobalSection
+EndGlobal
