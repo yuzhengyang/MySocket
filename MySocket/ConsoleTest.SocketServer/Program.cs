@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -65,41 +66,70 @@ namespace ConsoleTest.SocketServer
             //sSocket.ReceiveTimeout = 3000;
             //sSocket.IOControl(IOControlCode.KeepAliveValues, KeepAlive(1, 1000, 1000), null);
 
-            //for (int i = 1; i < 10; i++)
-            //{
+            for (int i = 1; i < 100; i++)
+            {
                 Console.WriteLine("准备就绪，等待接入客户端");
                 Socket serverSocket = sSocket.Accept();
-                serverSocket.ReceiveTimeout = 5000;
 
                 Task.Factory.StartNew(() =>
                 {
+                    List<byte> box = new List<byte>();
                     //SetKeepAlive(serverSocket, 1000, 1000);
-                    int index = 1;
-                    Console.WriteLine("接入客户端 " + index + " timeout = " + serverSocket.ReceiveTimeout);
+                    Console.WriteLine("接入客户端");
                     while (serverSocket.Connected)
                     {
                         if (serverSocket.Connected)
                         {
                             try
                             {
-                                byte[] recByte = new byte[4096];
-                                int bytes = serverSocket.Receive(recByte, recByte.Length, 0);
-                                string recStr = Encoding.GetEncoding("GBK").GetString(recByte, 0, bytes);
-                                if (recStr.Length > 0)
-                                    Console.WriteLine("接收到信息：" + recStr);
+                                byte[] recByte = new byte[10];
+                                int recLength = serverSocket.Receive(recByte, recByte.Length, 0);
+                                for (int k = 0; k < recLength; k++)
+                                {
+                                    box.Add(recByte[k]);
+                                }
 
-                                //string sendStr = ">";
-                                //byte[] sendByte = Encoding.GetEncoding("GBK").GetBytes(sendStr);
-                                //serverSocket.Send(sendByte, sendByte.Length, 0);
+                                if (box.Count > 6 && box[0] == 255 && box[1] == 254)
+                                {
+                                    int msgBodyLength = BitConverter.ToInt32(new byte[] { box[2], box[3], box[4], box[5] }, 0);
+                                    if (box.Count >= 6 + msgBodyLength)
+                                    {
+                                        byte[] body = box.GetRange(6, msgBodyLength).ToArray();
+                                        string bodyToGBK = Encoding.GetEncoding("GBK").GetString(body);
+                                        if (bodyToGBK.Length > 0)
+                                            Console.WriteLine("Receive:" + body.Length + "B,[" + bodyToGBK + "]");
+
+                                        serverSocket.Send(box.GetRange(0, 6).ToArray());
+
+                                        box.RemoveRange(0, 6 + msgBodyLength);
+                                    }
+                                }
+                                else
+                                {
+                                    box.Clear();
+                                    serverSocket.Send(new byte[] { 0 });
+                                }
+
+                                //string recStr = Encoding.GetEncoding("GBK").GetString(recByte, 0, recLength);
+                                //if (recLength > 0)
+                                //{
+                                //    Console.Write("rec:");
+                                //    for (int j = 0; j < recLength; j++)
+                                //    {
+                                //        Console.Write(recByte[j] + " ");
+                                //    }
+                                //    Console.WriteLine(" ,");
+                                //}
+                                //if (recStr.Length > 0)
+                                //    Console.WriteLine("接收到信息：" + recStr); 
                             }
                             catch (Exception e)
                             {
                                 break;
                             }
                         }
-                        Thread.Sleep(500);
                     }
-                    Console.WriteLine(index + " 失去连接");
+                    Console.WriteLine("```失去连接");
 
                     //send message
                     //Console.WriteLine("服务器端获得信息:{0}", recStr);
@@ -108,7 +138,7 @@ namespace ConsoleTest.SocketServer
                     //serverSocket.Send(sendByte, sendByte.Length, 0);
                     //serverSocket.Close();
                 });
-            //}
+            }
         }
         static byte[] KeepAlive(int onOff, int keepAliveTime, int keepAliveInterval)
         {

@@ -37,6 +37,7 @@ namespace WinFormTest.SocketClient
                     string host = TbIP.Text;
                     int port = int.Parse(TbPort.Text);
                     int interval = int.Parse(TbInterval.Text);
+                    string msg = TbMsg.Text;
                     //创建socket对象并连接
                     Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     s.Connect(host, port);
@@ -53,9 +54,15 @@ namespace WinFormTest.SocketClient
                         {
                             try
                             {
-                                string sendStr = string.Format("I'm {0}.你好。", index);
-                                byte[] sendBytes = Encoding.GetEncoding("GBK").GetBytes(sendStr);
-                                s.Send(sendBytes);
+                                byte[] msgHead = new byte[] { 255, 254 };
+                                byte[] msgBody = Encoding.GetEncoding("GBK").GetBytes(msg);
+                                byte[] msgBodyLength = BitConverter.GetBytes(msgBody.Length);
+
+                                byte[] content = new byte[msgHead.Length + msgBodyLength.Length + msgBody.Length];
+                                msgHead.CopyTo(content, 0);
+                                msgBodyLength.CopyTo(content, msgHead.Length);
+                                msgBody.CopyTo(content, content.Length - msgBody.Length);
+                                s.Send(content);
                             }
                             catch (Exception e)
                             {
