@@ -4,22 +4,28 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace MySocket
+namespace MySocket.Helper
 {
-    public class SocketTool : IDisposable
+    public class SocketHelper : IDisposable
     {
         const int ReceiveBufferSize = 1024;
+        const int ContentLengthSize = 4;
+
+        byte[] ContentHead = new byte[] { 0x4A, 0x50 };
 
         private string _IP;
         private int _Port;
-        private bool IsReceive = false;
+        private bool _IsConnected;
+        private CancellationTokenSource ReceiveCts = new CancellationTokenSource();
         private List<byte> ReceiveByte = new List<byte>();
         private readonly object ReceiveLock = new object();
 
-        public string IP { get; }
-        public int Port { get; }
+        public string IP { get { return _IP; } }
+        public int Port { get { return _Port; } }
+        public bool IsConnected { get { return _IsConnected; } }
         private IPAddress IPAddress { get; set; }
         private IPEndPoint IPEndPoint { get; set; }
         public Socket Socket { get; set; }
@@ -27,9 +33,9 @@ namespace MySocket
         public delegate void GetByteDelegate(byte[] b);
         public GetByteDelegate ReceiveByteContent;
 
-        private SocketTool() { }
+        private SocketHelper() { }
 
-        public SocketTool(string ip, int port)
+        public SocketHelper(string ip, int port)
         {
             _IP = ip;
             _Port = port;
@@ -49,13 +55,19 @@ namespace MySocket
                 {
                     Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     Socket.Connect(IPEndPoint);
+                    _IsConnected = true;
                     return true;
                 }
             }
             catch { }
+            _IsConnected = false;
             return false;
         }
 
+        public bool ImReceive(int length)
+        {
+            return Send(BitConverter.GetBytes(length));
+        }
         public bool Send(string s)
         {
             try
@@ -70,7 +82,19 @@ namespace MySocket
         {
             try
             {
-                int rs = Socket.Send(b);
+                //计算要发送的内容长度
+                byte[] length = BitConverter.GetBytes(b.Length);
+                //创建承载数据的byte[]数组
+                byte[] sendByte = new byte[ContentHead.Length + length.Length + b.Length];
+                //将信息头copy到数组
+                ContentHead.CopyTo(sendByte, 0);
+                //将信息长度copy到数组
+                length.CopyTo(sendByte, ContentHead.Length);
+                //将信息体copy到数组
+                b.CopyTo(sendByte, sendByte.Length - b.Length);
+
+                //发送
+                int rs = Socket.Send(sendByte.ToArray());
                 if (rs > 0) return true;
             }
             catch { }
@@ -81,67 +105,51 @@ namespace MySocket
         {
             Task.Factory.StartNew(() =>
             {
-                if (!IsReceive)
+                lock (ReceiveLock)
                 {
-                    lock (ReceiveLock)
+                    while (!ReceiveCts.IsCancellationRequested)
                     {
-                        if (!IsReceive)
-                        {
-                            IsReceive = true;
-                            while (IsReceive)
-                            {
-                                ReceiveContent();
-                            }
-                        }
+                        ReceiveContent();
                     }
                 }
-            });
+            }, ReceiveCts.Token);
         }
         private void ReceiveContent()
         {
-            //string recStr = "";
-            //byte[] recBytes = new byte[4096];
-            //int bytes = Socket.Receive(recBytes, recBytes.Length, 0);
-            //recStr += Encoding.ASCII.GetString(recBytes, 0, bytes);
             try
             {
                 byte[] recByte = new byte[ReceiveBufferSize];
                 int recLength = Socket.Receive(recByte, recByte.Length, 0);
+                //保存并整理接收到的数据
                 for (int k = 0; k < recLength; k++)
-                {
                     ReceiveByte.Add(recByte[k]);
-                }
 
-                if (ReceiveByte.Count > 6 && ReceiveByte[0] == 255 && ReceiveByte[1] == 254)
+                if (ReceiveByte.Count > 6 && ReceiveByte[0] == ContentHead[0] && ReceiveByte[1] == ContentHead[1])
                 {
+                    //标准Head数据的处理
                     int msgBodyLength = BitConverter.ToInt32(new byte[] { ReceiveByte[2], ReceiveByte[3], ReceiveByte[4], ReceiveByte[5] }, 0);
+
+                    //数据接收完整处理
                     if (ReceiveByte.Count >= 6 + msgBodyLength)
                     {
+                        //分离数据（Body）
                         byte[] body = ReceiveByte.GetRange(6, msgBodyLength).ToArray();
                         string bodyToGBK = Encoding.GetEncoding("GBK").GetString(body);
+
+                        //接收消息通知委托方法
                         ReceiveByteContent(body);
-                        Send(ReceiveByte.GetRange(0, 6).ToArray());
+
+                        //返回接收状态
+                        ImReceive(msgBodyLength);
                         ReceiveByte.RemoveRange(0, 6 + msgBodyLength);
                     }
                 }
                 else
                 {
+                    //不正确的Head数据，清除数据区，等待新数据
                     ReceiveByte.Clear();
                     Socket.Send(new byte[] { 0 });
                 }
-
-                //string recStr = Encoding.GetEncoding("GBK").GetString(recByte, 0, recLength);
-                //if (recLength > 0)
-                //{
-                //    Console.Write("rec:");
-                //    for (int j = 0; j < recLength; j++)
-                //    {
-                //        Console.Write(recByte[j] + " ");
-                //    }
-                //    Console.WriteLine(" ,");
-                //}
-                //if (recStr.Length > 0)
-                //    Console.WriteLine("接收到信息：" + recStr); 
             }
             catch (Exception e)
             { }
@@ -157,7 +165,7 @@ namespace MySocket
                 if (disposing)
                 {
                     // TODO: 释放托管状态(托管对象)。
-                    IsReceive = false;
+                    ReceiveCts.Cancel();
                     Socket?.Shutdown(SocketShutdown.Both);
                     Socket?.Close();
                     Socket?.Dispose();
