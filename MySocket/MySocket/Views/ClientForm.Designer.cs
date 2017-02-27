@@ -120,7 +120,7 @@
             this.TbIP.Name = "TbIP";
             this.TbIP.Size = new System.Drawing.Size(112, 21);
             this.TbIP.TabIndex = 28;
-            this.TbIP.Text = "192.168.255.225";
+            this.TbIP.Text = "192.168.31.238";
             this.TbIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // button10

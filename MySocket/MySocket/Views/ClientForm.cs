@@ -38,6 +38,7 @@ namespace MySocket.Views
                     string msg = TbMsg.Text;
                     //初始化SocketHelper
                     SocketHelper sh = new SocketHelper(host, port);
+                    sh.Init();
                     sh.Connect();
                     Sockets[index] = sh;
                     BeginInvoke(new Action(() =>
@@ -47,18 +48,14 @@ namespace MySocket.Views
                     //启动发送线程
                     while (Sockets[index].IsConnected)
                     {
-                        if (Sockets[index].IsConnected)
+                        try
                         {
-                            try
-                            {
-                                
-                                s.Send(content);
-                            }
-                            catch (Exception e)
-                            {
-                                CeaseFire(index);
-                                break;
-                            }
+                            Sockets[index].Send(msg);
+                        }
+                        catch (Exception e)
+                        {
+                            CeaseFire(index);
+                            break;
                         }
                         Thread.Sleep(interval);
                     }

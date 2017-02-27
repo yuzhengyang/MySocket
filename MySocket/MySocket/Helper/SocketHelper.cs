@@ -19,6 +19,7 @@ namespace MySocket.Helper
         private string _IP;
         private int _Port;
         private bool _IsConnected;
+        private bool _IsReceive;
         private CancellationTokenSource ReceiveCts = new CancellationTokenSource();
         private List<byte> ReceiveByte = new List<byte>();
         private readonly object ReceiveLock = new object();
@@ -26,12 +27,14 @@ namespace MySocket.Helper
         public string IP { get { return _IP; } }
         public int Port { get { return _Port; } }
         public bool IsConnected { get { return _IsConnected; } }
+        public bool IsReceive { get { return _IsReceive; } }
         private IPAddress IPAddress { get; set; }
         private IPEndPoint IPEndPoint { get; set; }
         public Socket Socket { get; set; }
+        public Socket Receiver { get; set; }
 
-        public delegate void GetByteDelegate(byte[] b);
-        public GetByteDelegate ReceiveByteContent;
+        public delegate void ReceiveByteDelegate(byte[] b);
+        public ReceiveByteDelegate ReceiveByteContent;
 
         private SocketHelper() { }
 
@@ -43,7 +46,7 @@ namespace MySocket.Helper
             IPEndPoint = new IPEndPoint(IPAddress, port);
         }
 
-        public bool Connect()
+        public bool Init()
         {
             try
             {
@@ -54,13 +57,21 @@ namespace MySocket.Helper
                 else
                 {
                     Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    Socket.Connect(IPEndPoint);
                     _IsConnected = true;
                     return true;
                 }
             }
             catch { }
             _IsConnected = false;
+            return false;
+        }
+        public bool Connect()
+        {
+            if (Socket != null)
+            {
+                Socket.Connect(IPEndPoint);
+                return true;
+            }
             return false;
         }
 
@@ -72,7 +83,7 @@ namespace MySocket.Helper
         {
             try
             {
-                byte[] sb = Encoding.ASCII.GetBytes(s);
+                byte[] sb = Encoding.GetEncoding("GBK").GetBytes(s);
                 return Send(sb);
             }
             catch { }
@@ -94,10 +105,11 @@ namespace MySocket.Helper
                 b.CopyTo(sendByte, sendByte.Length - b.Length);
 
                 //发送
-                int rs = Socket.Send(sendByte.ToArray());
+                int rs = Socket.Send(sendByte);
                 if (rs > 0) return true;
             }
-            catch { }
+            catch
+            { }
             return false;
         }
 
@@ -107,6 +119,10 @@ namespace MySocket.Helper
             {
                 lock (ReceiveLock)
                 {
+                    Init();
+                    Socket.Bind(IPEndPoint);
+                    Socket.Listen(0);
+                    Receiver = Socket.Accept();
                     while (!ReceiveCts.IsCancellationRequested)
                     {
                         ReceiveContent();
@@ -119,7 +135,7 @@ namespace MySocket.Helper
             try
             {
                 byte[] recByte = new byte[ReceiveBufferSize];
-                int recLength = Socket.Receive(recByte, recByte.Length, 0);
+                int recLength = Receiver.Receive(recByte, recByte.Length, 0);
                 //保存并整理接收到的数据
                 for (int k = 0; k < recLength; k++)
                     ReceiveByte.Add(recByte[k]);
@@ -148,7 +164,7 @@ namespace MySocket.Helper
                 {
                     //不正确的Head数据，清除数据区，等待新数据
                     ReceiveByte.Clear();
-                    Socket.Send(new byte[] { 0 });
+                    Receiver.Send(new byte[] { 0 });
                 }
             }
             catch (Exception e)

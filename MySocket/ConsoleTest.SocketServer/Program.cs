@@ -55,7 +55,7 @@ namespace ConsoleTest.SocketServer
         static void SimpleTest2()
         {
             int port = 28001;
-            string host = "192.168.255.24";
+            string host = "192.168.31.238";
 
             IPAddress ip = IPAddress.Parse(host);
             IPEndPoint ipe = new IPEndPoint(ip, port);
@@ -89,7 +89,7 @@ namespace ConsoleTest.SocketServer
                                     box.Add(recByte[k]);
                                 }
 
-                                if (box.Count > 6 && box[0] == 255 && box[1] == 254)
+                                if (box.Count > 6 && box[0] == 0x4A && box[1] == 0x50)
                                 {
                                     int msgBodyLength = BitConverter.ToInt32(new byte[] { box[2], box[3], box[4], box[5] }, 0);
                                     if (box.Count >= 6 + msgBodyLength)
