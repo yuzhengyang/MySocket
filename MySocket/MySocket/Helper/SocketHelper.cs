@@ -12,15 +12,13 @@ namespace MySocket.Helper
     public class SocketHelper : IDisposable
     {
         const int ReceiveBufferSize = 1024;
-        const int ContentLengthSize = 4;
-
         byte[] ContentHead = new byte[] { 0x4A, 0x50 };
 
         private string _IP;
         private int _Port;
         private bool _IsConnected;
         private bool _IsReceive;
-        private CancellationTokenSource ReceiveCts = new CancellationTokenSource();
+        //private CancellationTokenSource ReceiveCts = new CancellationTokenSource();
         private List<byte> ReceiveByte = new List<byte>();
         private readonly object ReceiveLock = new object();
 
@@ -44,40 +42,18 @@ namespace MySocket.Helper
             _Port = port;
             IPAddress = IPAddress.Parse(ip);
             IPEndPoint = new IPEndPoint(IPAddress, port);
-        }
-
-        public bool Init()
-        {
-            try
-            {
-                if (Socket != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    _IsConnected = true;
-                    return true;
-                }
-            }
-            catch { }
-            _IsConnected = false;
-            return false;
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
         public bool Connect()
         {
             if (Socket != null)
             {
                 Socket.Connect(IPEndPoint);
+                _IsConnected = true;
                 return true;
             }
+            _IsConnected = false;
             return false;
-        }
-
-        public bool ImReceive(int length)
-        {
-            return Send(BitConverter.GetBytes(length));
         }
         public bool Send(string s)
         {
@@ -119,18 +95,17 @@ namespace MySocket.Helper
             {
                 lock (ReceiveLock)
                 {
-                    Init();
                     Socket.Bind(IPEndPoint);
                     Socket.Listen(0);
                     Receiver = Socket.Accept();
                     while (!ReceiveCts.IsCancellationRequested)
                     {
-                        ReceiveContent();
+
                     }
                 }
             }, ReceiveCts.Token);
         }
-        private void ReceiveContent()
+        private void ReceiveDetails()
         {
             try
             {
@@ -156,7 +131,7 @@ namespace MySocket.Helper
                         ReceiveByteContent(body);
 
                         //返回接收状态
-                        ImReceive(msgBodyLength);
+                        Send(BitConverter.GetBytes(msgBodyLength));
                         ReceiveByte.RemoveRange(0, 6 + msgBodyLength);
                     }
                 }
