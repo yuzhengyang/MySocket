@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{22FCBAEE-4783-4380-A61D-F950084432E7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SocketServer</RootNamespace>
+    <AssemblyName>SocketServer</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>163.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CSkin">
+      <HintPath>..\CSkin.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TCPUDPServer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TCPUDPServer.designer.cs">
+      <DependentUpon>TCPUDPServer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="TCPUDPServer.resx">
+      <DependentUpon>TCPUDPServer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HelpCommonLib\HelpCommonLib.csproj">
+      <Project>{0f609376-9e9a-4b64-91f1-320abbc44184}</Project>
+      <Name>HelpCommonLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SocketServerCommonLib\SocketServerCommonLib.csproj">
+      <Project>{3230df07-c887-4eb0-8f98-b21c2100e952}</Project>
+      <Name>SocketServerCommonLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mouse_up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mouse_over.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mouse_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\07822.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\07821.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00034[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00035[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00036[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00037[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00038[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00039[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00040[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00041[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00042[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\00043[17x25x8BPP].png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="163.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
